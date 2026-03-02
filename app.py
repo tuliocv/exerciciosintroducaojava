@@ -109,7 +109,7 @@ def teacher_login_ui():
         if st.sidebar.button("Entrar", use_container_width=True):
             st.session_state["teacher_ok"] = (pwd == TEACHER_PASS)
             st.rerun()
-        st.sidebar.caption("Configure em `.streamlit/secrets.toml` ou Settings → Secrets (Cloud).")
+        st.sidebar.caption("")
 
 # =========================
 # Sidebar menu
@@ -124,20 +124,20 @@ else:
     st.sidebar.radio("📌 Menu", ["Aluno"], index=0, disabled=True)
 
 st.sidebar.divider()
-st.sidebar.caption("Os dados ficam em `data/feedback_exercicios.csv`")
+st.sidebar.caption("")
 
 # =========================
 # Main
 # =========================
 st.title("🧩 Exercícios em Aula — Status + Dificuldade")
-st.caption("Selecione um exercício, marque se conseguiu e avalie a dificuldade. As respostas ficam salvas para analytics do professor.")
+st.caption("Selecione um exercício, marque se conseguiu e avalie a dificuldade.")
 
 if view == "Aluno":
     # Identificação
     st.subheader("👥 Identificação (individual ou dupla)")
     team_names = st.text_input(
         "Nome(s) dos integrantes",
-        placeholder="Ex: Ana Silva  |  ou  Ana Silva e Bruno Souza",
+        placeholder="Ex: Ana Silva ou  Ana Silva e Bruno Souza",
         key="team_names"
     )
 
@@ -161,7 +161,7 @@ if view == "Aluno":
         comment = st.text_area(
             "Comentário (opcional)",
             height=90,
-            placeholder="Ex: travei na divisão / não lembrei do Scanner / etc.",
+            placeholder="Ex: travei na divisão / erro difícil de solucionar / etc.",
             key=f"comment_{ex['id']}"
         )
         submitted = st.form_submit_button("💾 Salvar registro deste exercício", use_container_width=True)
