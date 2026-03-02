@@ -9,7 +9,7 @@ from filelock import FileLock
 # =========================
 # Config
 # =========================
-st.set_page_config(page_title="Exercícios — Feedback em Aula", page_icon="🧩", layout="centered")
+st.set_page_config(page_title="Exercícios — Feedback em Aula", page_icon="🧩", layout="wide")
 
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
@@ -18,10 +18,10 @@ CSV_PATH = DATA_DIR / "feedback_exercicios.csv"
 JSONL_PATH = DATA_DIR / "feedback_exercicios.jsonl"
 LOCK_PATH = DATA_DIR / "feedback_exercicios.lock"
 
-TEACHER_PASS = st.secrets.get("app", {}).get("teacher_password", "")
-
 STATUS_OPTS = ["✅ Feito", "❌ Não consegui"]
 DIF_OPTS = ["Fácil", "Médio", "Difícil"]
+
+TEACHER_PASS = st.secrets.get("app", {}).get("teacher_password", "")
 
 # =========================
 # Exercícios (enunciados completos)
@@ -81,123 +81,132 @@ def load_df() -> pd.DataFrame:
     return pd.read_csv(CSV_PATH)
 
 # =========================
-# Modo professor
+# Auth professor (sidebar)
 # =========================
-def is_teacher() -> bool:
-    return bool(TEACHER_PASS) and st.session_state.get("teacher_ok", False)
+def teacher_is_enabled() -> bool:
+    return bool(TEACHER_PASS)
 
-def teacher_login_box():
-    if not TEACHER_PASS:
-        st.info("🔐 Modo professor desativado (nenhuma senha configurada em st.secrets).")
+def teacher_is_logged() -> bool:
+    return st.session_state.get("teacher_ok", False) is True
+
+def teacher_login_ui():
+    st.sidebar.subheader("🔐 Professor")
+    if not teacher_is_enabled():
+        st.sidebar.info("Modo professor desativado (sem `teacher_password` em secrets).")
         return
-    with st.expander("🔐 Modo professor"):
-        pwd = st.text_input("Senha do professor", type="password")
-        if st.form_submit_button("Entrar", use_container_width=True):
+
+    # estado inicial
+    if "teacher_ok" not in st.session_state:
+        st.session_state["teacher_ok"] = False
+
+    if teacher_is_logged():
+        st.sidebar.success("Logado ✅")
+        if st.sidebar.button("Sair", use_container_width=True):
+            st.session_state["teacher_ok"] = False
+            st.rerun()
+    else:
+        pwd = st.sidebar.text_input("Senha", type="password", key="teacher_pwd_sidebar")
+        if st.sidebar.button("Entrar", use_container_width=True):
             st.session_state["teacher_ok"] = (pwd == TEACHER_PASS)
-        if is_teacher():
-            st.success("Modo professor ativado ✅")
+            st.rerun()
+        st.sidebar.caption("Configure em `.streamlit/secrets.toml` ou Settings → Secrets (Cloud).")
 
 # =========================
-# UI
+# Sidebar menu
+# =========================
+teacher_login_ui()
+
+st.sidebar.divider()
+if teacher_is_logged():
+    view = st.sidebar.radio("📌 Menu", ["Aluno", "Professor"], index=0)
+else:
+    view = "Aluno"
+    st.sidebar.radio("📌 Menu", ["Aluno"], index=0, disabled=True)
+
+st.sidebar.divider()
+st.sidebar.caption("Os dados ficam em `data/feedback_exercicios.csv`")
+
+# =========================
+# Main
 # =========================
 st.title("🧩 Exercícios em Aula — Status + Dificuldade")
 st.caption("Selecione um exercício, marque se conseguiu e avalie a dificuldade. As respostas ficam salvas para analytics do professor.")
 
-# Login professor (sem conflito de form principal)
-if TEACHER_PASS:
-    with st.expander("🔐 Modo professor"):
-        pwd = st.text_input("Senha do professor", type="password", key="teacher_pwd")
-        if st.button("Entrar", use_container_width=True, key="teacher_login_btn"):
-            st.session_state["teacher_ok"] = (pwd == TEACHER_PASS)
-        if is_teacher():
-            st.success("Modo professor ativado ✅")
-else:
-    st.info("🔐 Modo professor desativado (nenhuma senha configurada em st.secrets).")
-
-st.divider()
-
-# Identificação
-st.subheader("👥 Identificação (individual ou dupla)")
-team_names = st.text_input(
-    "Nome(s) dos integrantes",
-    placeholder="Ex: Ana Silva  |  ou  Ana Silva e Bruno Souza",
-    key="team_names"
-)
-
-st.divider()
-
-# Seleção do exercício
-options = [f"{e['id']} — {e['title']}" for e in EXS]
-selected = st.selectbox("📌 Selecione o exercício", options, key="exercise_select")
-idx = options.index(selected)
-ex = EXS[idx]
-
-# Enunciado central
-st.subheader(f"{ex['id']} — {ex['title']}")
-st.write(ex["prompt"])
-
-st.markdown("### ✅ Registro do grupo/aluno")
-
-# =========================
-# FORM (resolve o erro e limpa sozinho)
-# =========================
-with st.form(key=f"form_{ex['id']}", clear_on_submit=True):
-    status = st.radio("Você conseguiu fazer?", STATUS_OPTS, horizontal=True, key=f"status_{ex['id']}")
-    difficulty = st.radio("Como foi a dificuldade?", DIF_OPTS, horizontal=True, key=f"dif_{ex['id']}")
-    comment = st.text_area(
-        "Comentário (opcional)",
-        height=90,
-        placeholder="Ex: travei na divisão / não lembrei do Scanner / etc.",
-        key=f"comment_{ex['id']}"
+if view == "Aluno":
+    # Identificação
+    st.subheader("👥 Identificação (individual ou dupla)")
+    team_names = st.text_input(
+        "Nome(s) dos integrantes",
+        placeholder="Ex: Ana Silva  |  ou  Ana Silva e Bruno Souza",
+        key="team_names"
     )
 
-    submitted = st.form_submit_button("💾 Salvar registro deste exercício", use_container_width=True)
+    st.divider()
 
-if submitted:
-    if not team_names.strip():
-        st.warning("Preencha **Nome(s) dos integrantes** antes de salvar.")
-    else:
-        row = {
-            "timestamp": datetime.now().isoformat(timespec="seconds"),
-            "team_names": team_names.strip(),
-            "exercise_id": ex["id"],
-            "exercise_title": ex["title"],
-            "status": status,
-            "difficulty": difficulty,
-            "comment": (comment or "").strip(),
-        }
-        append_submission(row)
-        st.success("Registro salvo ✅ (o formulário foi limpo automaticamente)")
+    # Seleção do exercício (centro)
+    options = [f"{e['id']} — {e['title']}" for e in EXS]
+    selected = st.selectbox("📌 Selecione o exercício", options, key="exercise_select")
+    idx = options.index(selected)
+    ex = EXS[idx]
 
-st.divider()
+    # Enunciado completo
+    st.subheader(f"{ex['id']} — {ex['title']}")
+    st.write(ex["prompt"])
 
-# =========================
-# Painel do professor
-# =========================
-if is_teacher():
+    st.markdown("### ✅ Registro do grupo/aluno")
+
+    with st.form(key=f"form_{ex['id']}", clear_on_submit=True):
+        status = st.radio("Você conseguiu fazer?", STATUS_OPTS, horizontal=True, key=f"status_{ex['id']}")
+        difficulty = st.radio("Como foi a dificuldade?", DIF_OPTS, horizontal=True, key=f"dif_{ex['id']}")
+        comment = st.text_area(
+            "Comentário (opcional)",
+            height=90,
+            placeholder="Ex: travei na divisão / não lembrei do Scanner / etc.",
+            key=f"comment_{ex['id']}"
+        )
+        submitted = st.form_submit_button("💾 Salvar registro deste exercício", use_container_width=True)
+
+    if submitted:
+        if not team_names.strip():
+            st.warning("Preencha **Nome(s) dos integrantes** antes de salvar.")
+        else:
+            row = {
+                "timestamp": datetime.now().isoformat(timespec="seconds"),
+                "team_names": team_names.strip(),
+                "exercise_id": ex["id"],
+                "exercise_title": ex["title"],
+                "status": status,
+                "difficulty": difficulty,
+                "comment": (comment or "").strip(),
+            }
+            append_submission(row)
+            st.success("Registro salvo ✅")
+
+elif view == "Professor":
     st.subheader("📊 Painel do Professor (Analytics)")
-    df = load_df()
 
+    df = load_df()
     if df.empty:
         st.warning("Ainda não há registros salvos.")
     else:
-        c1, c2 = st.columns([1.3, 1.7])
+        c1, c2, c3 = st.columns([1.4, 1.2, 1.4])
         with c1:
             ex_sel = st.selectbox("Filtrar por exercício", ["(Todos)"] + [e["id"] for e in EXS], key="prof_ex_filter")
         with c2:
-            last_n = st.slider("Mostrar últimos N registros", 50, 2000, 300, key="prof_last_n")
+            status_sel = st.selectbox("Filtrar por status", ["(Todos)"] + STATUS_OPTS, key="prof_status_filter")
+        with c3:
+            last_n = st.slider("Mostrar últimos N registros", 50, 5000, 500, key="prof_last_n")
 
         dff = df.copy()
         if ex_sel != "(Todos)":
             dff = dff[dff["exercise_id"].astype(str) == ex_sel]
+        if status_sel != "(Todos)":
+            dff = dff[dff["status"].astype(str) == status_sel]
 
         if "timestamp" in dff.columns:
             dff = dff.sort_values("timestamp", ascending=False)
 
-        st.markdown("#### 🧾 Registros (amostra)")
-        st.dataframe(dff.head(last_n), use_container_width=True, hide_index=True)
-
-        st.markdown("#### 📌 Resumo")
+        # KPIs
         total = len(dff)
         feito = int((dff["status"] == "✅ Feito").sum())
         nao = int((dff["status"] == "❌ Não consegui").sum())
@@ -220,7 +229,10 @@ if is_teacher():
             vc = dff["difficulty"].value_counts().reindex(order).fillna(0)
             st.bar_chart(vc)
 
-        st.markdown("#### ⬇️ Download dos dados")
+        st.markdown("#### 🧾 Registros")
+        st.dataframe(dff.head(last_n), use_container_width=True, hide_index=True)
+
+        st.markdown("#### ⬇️ Download")
         st.download_button(
             "Baixar CSV filtrado",
             data=dff.to_csv(index=False).encode("utf-8"),
@@ -228,7 +240,6 @@ if is_teacher():
             mime="text/csv",
             use_container_width=True
         )
-
         if CSV_PATH.exists():
             st.download_button(
                 "Baixar CSV completo (arquivo)",
@@ -237,8 +248,3 @@ if is_teacher():
                 mime="text/csv",
                 use_container_width=True
             )
-else:
-    st.caption("Professor: ative o modo professor para ver analytics e baixar os dados.")
-
-st.divider()
-st.caption("Salvamento local em `data/feedback_exercicios.csv` e log em `data/feedback_exercicios.jsonl`.")
