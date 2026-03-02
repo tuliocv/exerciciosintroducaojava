@@ -129,7 +129,7 @@ st.sidebar.caption("")
 # =========================
 # Main
 # =========================
-st.title("🧩 Exercícios em Aula — Status + Dificuldade")
+st.title("🧩 Exercícios em Aula — Entendendo Algoritmos")
 st.caption("Selecione um exercício, marque se conseguiu e avalie a dificuldade.")
 
 if view == "Aluno":
