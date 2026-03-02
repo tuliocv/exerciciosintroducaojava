@@ -27,51 +27,32 @@ DIF_OPTS = ["Fácil", "Médio", "Difícil"]
 # Exercícios (enunciados completos)
 # =========================
 EXS = [
-    {
-        "id": "Exemplo 1",
-        "title": "Exibir nome",
-        "prompt": "Exemplo 1: Desenvolva um programa que exiba seu nome na tela."
-    },
-    {
-        "id": "Exemplo 2",
-        "title": "Operações com x e y",
-        "prompt": "Exemplo 2: Desenvolva um programa que calcule a soma, subtração, multiplicação e divisão dos números    x = 5 e y = 2."
-    },
-    {
-        "id": "Exemplo 3",
-        "title": "Expressão 2a + 3b",
-        "prompt": "Exemplo 3: Construa programa que exiba o resultado de 2a + 3b, em que o valor a vale 3 e o valor b vale 5."
-    },
-    {
-        "id": "Ex 4",
-        "title": "Média de 3 números",
-        "prompt": "Ex 4: Calcule a média aritmética de 3 números inseridos pelo usuário."
-    },
-    {
-        "id": "Ex 5",
-        "title": "Média final (A1/A2/A3)",
-        "prompt": "Ex 5: Calcule a média final das avaliações A1, A2 e A3, sabendo que A1 e A2 possuem peso de 30% e a A3 o peso é igual a 40%."
-    },
-    {
-        "id": "Ex 7",
-        "title": "Salário líquido (21%)",
-        "prompt": "Ex 7: Desenvolva um algoritmo que permite a inserção do salário bruto do colaborador e calcule o salário líquido, sabendo que o desconto aproximado é de 21%."
-    },
-    {
-        "id": "Ex 8",
-        "title": "Velocidade média",
-        "prompt": "Ex 8:  Escreva um programa que calcule a velocidade média de um veículo. Para isso, pergunte a distância percorrida, em km, e o tempo gasto neste trajeto em horas."
-    },
-    {
-        "id": "Ex 9",
-        "title": "Carro alugado",
-        "prompt": "Ex 9: Escreve um programa que pergunte a quantidade de km percorridos por um carro alugado pelo usuário, assim como a quantidade de dias pelos quais o carro ficou alugado. Calcule o preço a pagar, sabendo que o carro custa  60,00 por dia e  0,15 por km rodado."
-    },
-    {
-        "id": "Ex 10",
-        "title": "Dias de vida perdidos (estimativa)",
-        "prompt": "Ex 10: Desenvolva um programa para calcular a redução do tempo de vida de um fumante. Pergunte a quantidade de cigarros fumados por dia e quantos anos ele já fumou. Considere que um fumante perde 10 minutos de vida a cada cigarro, e calcule quantos dias de vida um fumante perderá. Apresente o resultado em dias."
-    },
+    {"id": "Exemplo 1", "title": "Exibir nome",
+     "prompt": "Exemplo 1: Desenvolva um programa que exiba seu nome na tela."},
+
+    {"id": "Exemplo 2", "title": "Operações com x e y",
+     "prompt": "Exemplo 2: Desenvolva um programa que calcule a soma, subtração, multiplicação e divisão dos números    x = 5 e y = 2."},
+
+    {"id": "Exemplo 3", "title": "Expressão 2a + 3b",
+     "prompt": "Exemplo 3: Construa programa que exiba o resultado de 2a + 3b, em que o valor a vale 3 e o valor b vale 5."},
+
+    {"id": "Ex 4", "title": "Média de 3 números",
+     "prompt": "Ex 4: Calcule a média aritmética de 3 números inseridos pelo usuário."},
+
+    {"id": "Ex 5", "title": "Média final (A1/A2/A3)",
+     "prompt": "Ex 5: Calcule a média final das avaliações A1, A2 e A3, sabendo que A1 e A2 possuem peso de 30% e a A3 o peso é igual a 40%."},
+
+    {"id": "Ex 7", "title": "Salário líquido (21%)",
+     "prompt": "Ex 7: Desenvolva um algoritmo que permite a inserção do salário bruto do colaborador e calcule o salário líquido, sabendo que o desconto aproximado é de 21%."},
+
+    {"id": "Ex 8", "title": "Velocidade média",
+     "prompt": "Ex 8:  Escreva um programa que calcule a velocidade média de um veículo. Para isso, pergunte a distância percorrida, em km, e o tempo gasto neste trajeto em horas."},
+
+    {"id": "Ex 9", "title": "Carro alugado",
+     "prompt": "Ex 9: Escreve um programa que pergunte a quantidade de km percorridos por um carro alugado pelo usuário, assim como a quantidade de dias pelos quais o carro ficou alugado. Calcule o preço a pagar, sabendo que o carro custa R$ 60,00 por dia e R$ 0,15 por km rodado."},
+
+    {"id": "Ex 10", "title": "Dias de vida perdidos (estimativa)",
+     "prompt": "Ex 10: Desenvolva um programa para calcular a redução do tempo de vida de um fumante. Pergunte a quantidade de cigarros fumados por dia e quantos anos ele já fumou. Considere que um fumante perde 10 minutos de vida a cada cigarro, e calcule quantos dias de vida um fumante perderá. Apresente o resultado em dias."},
 ]
 
 # =========================
@@ -138,24 +119,29 @@ st.divider()
 
 # Seleção por lista suspensa
 options = [f"{e['id']} — {e['title']}" for e in EXS]
-selected = st.selectbox("📌 Selecione o exercício", options)
+selected = st.selectbox("📌 Selecione o exercício", options, key="exercise_select")
 
-# pega exercício
 idx = options.index(selected)
 ex = EXS[idx]
 
-# Enunciado no centro, completo
+# Enunciado central
 st.subheader(f"{ex['id']} — {ex['title']}")
 st.write(ex["prompt"])
 
 st.markdown("### ✅ Registro do grupo/aluno")
 
+# Keys por exercício
 status_key = f"status_{ex['id']}"
 dif_key = f"dif_{ex['id']}"
 comment_key = f"comment_{ex['id']}"
 
+# ✅ Inicializa session_state ANTES de criar widgets
+if comment_key not in st.session_state:
+    st.session_state[comment_key] = ""
+
 status = st.radio("Você conseguiu fazer?", STATUS_OPTS, key=status_key, horizontal=True)
 difficulty = st.radio("Como foi a dificuldade?", DIF_OPTS, key=dif_key, horizontal=True)
+
 comment = st.text_area(
     "Comentário (opcional)",
     key=comment_key,
@@ -164,6 +150,7 @@ comment = st.text_area(
 )
 
 col1, col2 = st.columns([1, 1])
+
 with col1:
     if st.button("💾 Salvar registro deste exercício", use_container_width=True):
         if not team_names.strip():
@@ -179,13 +166,17 @@ with col1:
                 "comment": (comment or "").strip(),
             }
             append_submission(row)
-            st.success("Registro salvo ✅")
-            # limpa comentário para evitar reenvio acidental
+
+            # ✅ Para limpar SEM quebrar: limpar e rerun
             st.session_state[comment_key] = ""
+            st.success("Registro salvo ✅")
+            st.rerun()
 
 with col2:
     if st.button("🧹 Limpar comentário", use_container_width=True):
+        # ✅ Limpa e rerun (evita set após widget “prender” o estado)
         st.session_state[comment_key] = ""
+        st.rerun()
 
 st.divider()
 
@@ -241,26 +232,6 @@ if is_teacher():
             order = ["Fácil", "Médio", "Difícil"]
             vc = dff["difficulty"].value_counts().reindex(order).fillna(0)
             st.bar_chart(vc)
-
-        st.markdown("#### 🧠 Mapa por exercício (agregado)")
-        agg = (
-            dff.groupby(["exercise_id", "exercise_title"])
-               .agg(
-                   registros=("status", "count"),
-                   feito=("status", lambda s: (s == "✅ Feito").sum()),
-                   nao_consegui=("status", lambda s: (s == "❌ Não consegui").sum()),
-                   dificil=("difficulty", lambda s: (s == "Difícil").sum()),
-                   medio=("difficulty", lambda s: (s == "Médio").sum()),
-                   facil=("difficulty", lambda s: (s == "Fácil").sum()),
-               )
-               .reset_index()
-        )
-        agg["%feito"] = (agg["feito"] / agg["registros"] * 100).round(1)
-        st.dataframe(
-            agg.sort_values(["%feito", "registros"], ascending=[True, False]),
-            use_container_width=True,
-            hide_index=True
-        )
 
         st.markdown("#### ⬇️ Download dos dados")
         csv_bytes = dff.to_csv(index=False).encode("utf-8")
