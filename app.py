@@ -186,6 +186,32 @@ elif view == "Professor":
     st.subheader("📊 Painel do Professor (Analytics)")
 
     df = load_df()
+    
+    st.markdown("### 🧨 Administração (Professor)")
+    with st.expander("Limpar respostas (apagar tudo)"):
+        st.warning("Isso apaga TODOS os registros salvos (CSV e JSONL). Não dá para desfazer.")
+    
+        confirm = st.checkbox("Confirmo que quero apagar todos os registros", key="confirm_delete_all")
+    
+        col_del1, col_del2 = st.columns([1, 1])
+        with col_del1:
+            if st.button("🗑️ Limpar respostas agora", use_container_width=True, disabled=not confirm):
+                # apaga arquivos (se existirem)
+                try:
+                    if CSV_PATH.exists():
+                        CSV_PATH.unlink()
+                    if JSONL_PATH.exists():
+                        JSONL_PATH.unlink()
+                    if LOCK_PATH.exists():
+                        LOCK_PATH.unlink()  # opcional
+    
+                    st.success("Respostas apagadas com sucesso ✅")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Não foi possível apagar os arquivos: {e}")
+    
+        with col_del2:
+            st.caption("Dica: use isso ao final da aula para começar uma nova turma.")
     if df.empty:
         st.warning("Ainda não há registros salvos.")
     else:
