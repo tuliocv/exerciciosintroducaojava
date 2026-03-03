@@ -53,6 +53,21 @@ EXS = [
 
     {"id": "Ex 10", "title": "Dias de vida perdidos (estimativa)",
      "prompt": "Ex 10: Desenvolva um programa para calcular a redução do tempo de vida de um fumante. Pergunte a quantidade de cigarros fumados por dia e quantos anos ele já fumou. Considere que um fumante perde 10 minutos de vida a cada cigarro, e calcule quantos dias de vida um fumante perderá. Apresente o resultado em dias."},
+    
+    {"id": "Ex 11", "title": "Consumo de combustível",
+     "prompt": "Ex 11: Desenvolva um programa que pergunte a distância total percorrida por um carro (em km) e a quantidade de combustível gasto (em litros). Calcule e exiba o consumo médio do veículo em km/l."},
+
+    {"id": "Ex 12", "title": "Conversão de temperatura",
+     "prompt": "Ex 12: Escreva um programa que leia uma temperatura em graus Celsius e converta para Fahrenheit. Utilize a fórmula: F = (C * 9/5) + 32."},
+
+    {"id": "Ex 13", "title": "Cálculo de área de terreno",
+     "prompt": "Ex 13: Desenvolva um programa que pergunte a largura e o comprimento de um terreno (em metros) e calcule a área total em metros quadrados."},
+
+    {"id": "Ex 14", "title": "Total com desconto",
+     "prompt": "Ex 14: Escreva um programa que pergunte o valor de um produto e o percentual de desconto. Calcule o valor final do produto após aplicar o desconto."},
+
+    {"id": "Ex 15", "title": "Energia elétrica",
+     "prompt": "Ex 15: Desenvolva um programa que pergunte a quantidade de kWh consumidos em uma residência e o valor do kWh. Calcule o valor total da conta de energia elétrica."},
 ]
 
 # =========================
