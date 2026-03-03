@@ -66,8 +66,8 @@ EXS = [
     {"id": "Ex 14", "title": "Total com desconto",
      "prompt": "Ex 14: Escreva um programa que pergunte o valor de um produto e o percentual de desconto. Calcule o valor final do produto após aplicar o desconto."},
 
-    {"id": "Ex 15", "title": "Energia elétrica",
-     "prompt": "Ex 15: Desenvolva um programa que pergunte a quantidade de kWh consumidos em uma residência e o valor do kWh. Calcule o valor total da conta de energia elétrica."},
+    {"id": "Ex 15", "title": "Conversão de tempo em dias",
+     "prompt": "Ex 15: Desenvolva um programa que pergunte ao usuário a quantidade total de horas trabalhadas em um projeto e converta esse tempo para dias completos, considerando que um dia possui 24 horas. Exiba o resultado em dias."},
 ]
 
 # =========================
